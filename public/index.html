@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Finanzas UTS</title>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <div class="login-container">
+    <h2>Iniciar Sesión</h2>
+    <form id="formLogin">
+      <input type="text" id="username" placeholder="Usuario" required />
+      <input type="password" id="password" placeholder="Contraseña" required />
+      <button type="submit">Ingresar</button>
+    </form>
+    <div id="mensajeLogin" style="margin-top: 10px;"></div>
+    <p>¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
+  </div>
+
+  <script>
+  document.getElementById("formLogin").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const datos = {
+      username: document.getElementById("username").value,
+      password: document.getElementById("password").value
+    };
+
+    fetch("../routes/index.php?action=login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(datos)
+    })
+    .then(res => res.json())
+    .then(response => {
+      const mensaje = document.getElementById("mensajeLogin");
+
+      if (response.exito) {
+        localStorage.setItem("user_id", response.user.id);
+        localStorage.setItem("nombres", response.user.nombres);
+        localStorage.setItem("apellidos", response.user.apellidos);
+
+        mensaje.textContent = "✅ Bienvenido, redirigiendo a tu perfil...";
+        mensaje.style.color = "green";
+
+        setTimeout(() => {
+          window.location.href = "perfil.html";
+        }, 1000);
+      } else {
+        mensaje.textContent = "❌ " + (response.error || "Credenciales incorrectas.");
+        mensaje.style.color = "red";
+      }
+    })
+    .catch(() => {
+      const mensaje = document.getElementById("mensajeLogin");
+      mensaje.textContent = "❌ Error al conectar con el servidor.";
+      mensaje.style.color = "red";
+    });
+  });
+  </script>
+</body>
+</html>
